@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# A학원 SaaS · Next.js 와이어프레임
 
-## Getting Started
+`academy-ui-wireframe.html`을 기반으로 새로 구성한 Next.js + TypeScript 프로젝트입니다.
 
-First, run the development server:
+## 실행
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 `http://localhost:3000`을 열면 됩니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Google 로그인 설정
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Google Cloud Console에서 OAuth 클라이언트 유형을 **웹 애플리케이션**으로 생성합니다.
+2. 승인된 리디렉션 URI에 `http://localhost:3000/api/auth/callback/google`을 등록합니다.
+3. `.env.example`을 `.env.local`로 복사하고 Google 클라이언트 ID와 보안 비밀을 입력합니다.
+4. `npx auth secret`으로 `AUTH_SECRET`을 생성한 뒤 개발 서버를 다시 실행합니다.
 
-## Learn More
+`.env.local`은 저장소에 커밋하지 않습니다. 배포 환경에서는 실제 도메인의
+`https://도메인/api/auth/callback/google`도 Google Cloud Console에 등록해야 합니다.
 
-To learn more about Next.js, take a look at the following resources:
+## 주요 기능
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- 원장·교사·학부모·학생·게스트 역할 전환
+- 역할별 화면 선택 및 사이드 메뉴 연동
+- Auth.js 기반 Google OAuth 로그인
+- Apple 디자인 토큰 기반의 반응형 UI
+- 모바일에서 가로 메뉴와 1열 카드 레이아웃 적용
+- React 상태로 화면 전환과 폼 컨트롤 관리
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 주요 파일
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app/page.tsx`: 역할·화면 데이터 및 React UI
+- `src/app/login/page.tsx`: Google 로그인 화면
+- `src/auth.ts`: Auth.js와 Google 공급자 설정
+- `src/app/page.module.css`: Stripe 스타일과 반응형 레이아웃
+- `src/app/globals.css`: 전역 타이포그래피와 기본 스타일
+- `src/app/layout.tsx`: 한국어 문서 설정과 메타데이터
