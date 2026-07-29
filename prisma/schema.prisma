@@ -1,0 +1,759 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generate/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  DIRECTOR
+  TEACHER
+  STAFF
+  PARENT
+  STUDENT
+  GUEST
+
+  @@map("user_role")
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  WITHDRAWN
+
+  @@map("user_status")
+}
+
+enum StudentStatus {
+  ENROLLED
+  PAUSED
+  WITHDRAWN
+
+  @@map("student_status")
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+
+  @@map("enrollment_status")
+}
+
+enum ClassSessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+
+  @@map("class_session_status")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  EXCUSED
+  EARLY_LEAVE
+
+  @@map("attendance_status")
+}
+
+enum LearningRecordType {
+  CLASS_NOTE
+  HOMEWORK
+  LIFE_RECORD
+
+  @@map("learning_record_type")
+}
+
+enum WrongNoteStatus {
+  OPEN
+  REVIEWED
+  MASTERED
+
+  @@map("wrong_note_status")
+}
+
+enum AiReportStatus {
+  UNWRITTEN
+  DRAFTING
+  PENDING_APPROVAL
+  REJECTED
+  SENT
+  FAILED
+
+  @@map("ai_report_status")
+}
+
+enum ChurnCaseStatus {
+  DETECTED
+  COUNSELING
+  IMPROVED
+  WITHDRAWN
+
+  @@map("churn_case_status")
+}
+
+enum ChurnSignalType {
+  ATTENDANCE_DROP
+  SCORE_DROP
+  CONSECUTIVE_ABSENCE
+  UNPAID_DAYS
+
+  @@map("churn_signal_type")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  OVERDUE
+  CANCELLED
+
+  @@map("invoice_status")
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+
+  @@map("payment_status")
+}
+
+enum PushDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+
+  @@map("push_delivery_status")
+}
+
+enum NewsKind {
+  NOTICE
+  BANNER
+
+  @@map("news_kind")
+}
+
+enum NewsCategory {
+  PARENT_ADMISSION
+  PARENT_NOTICE
+  STUDENT_YOUTH
+  GENERAL
+
+  @@map("news_category")
+}
+
+enum NewsAudience {
+  PARENT
+  STUDENT
+  ALL
+
+  @@map("news_audience")
+}
+
+enum InquiryStatus {
+  NEW
+  IN_PROGRESS
+  DONE
+  SPAM
+
+  @@map("inquiry_status")
+}
+
+model User {
+  id                   String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                String     @unique
+  name                 String
+  phone                String?
+  address              String?
+  schoolName           String?    @map("school_name")
+  grade                String?
+  imageUrl             String?    @map("image_url")
+  role                 UserRole   @default(GUEST)
+  status               UserStatus @default(ACTIVE)
+  emailVerifiedAt      DateTime?  @map("email_verified_at") @db.Timestamptz(6)
+  onboardingCompleteAt DateTime?  @map("onboarding_complete_at") @db.Timestamptz(6)
+  lastLoginAt          DateTime?  @map("last_login_at") @db.Timestamptz(6)
+  createdAt            DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  oauthAccounts       OAuthAccount[]
+  studentProfile      Student?
+  permissionGrant     PermissionGrant?
+  parentLinks         ParentStudentLink[]    @relation("ParentLinks")
+  linksCreated        ParentStudentLink[]    @relation("LinksCreated")
+  linksEnded          ParentStudentLink[]    @relation("LinksEnded")
+  classesTaught       Class[]
+  attendanceUpdates   AttendanceRecord[]
+  absenceRequests     AbsenceRequest[]
+  learningRecords     LearningRecord[]
+  gradeRecordsCreated GradeRecord[]
+  wrongNotesAuthored  WrongNote[]
+  counselingMemos     CounselingMemo[]
+  reportsAuthored     AiReport[]             @relation("ReportAuthor")
+  reportsApproved     AiReport[]             @relation("ReportApprover")
+  churnCasesAssigned  ChurnCase[]
+  invoices            Invoice[]
+  payments            Payment[]
+  sentMessages        Message[]
+  messageRecipients   MessageRecipient[]
+  pushSubscriptions   PushSubscription[]
+  newsItems           NewsItem[]
+  assignedInquiries   Inquiry[]
+  auditLogs           AuditLog[]
+  thresholdUpdates    ChurnThresholdConfig[]
+
+  @@map("users")
+}
+
+model OAuthAccount {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  type              String   @default("oauth")
+  provider          String
+  providerAccountId String   @map("provider_account_id")
+  refreshToken      String?  @map("refresh_token")
+  accessToken       String?  @map("access_token")
+  expiresAt         Int?     @map("expires_at")
+  tokenType         String?  @map("token_type")
+  scope             String?
+  idToken           String?  @map("id_token")
+  sessionState      String?  @map("session_state")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("oauth_accounts")
+}
+
+model PermissionGrant {
+  userId                      String   @id @map("user_id") @db.Uuid
+  viewAllStudents             Boolean  @default(false) @map("view_all_students")
+  viewParentContact           Boolean  @default(false) @map("view_parent_contact")
+  editLifeCounseling          Boolean  @default(false) @map("edit_life_counseling")
+  writeAiReport               Boolean  @default(false) @map("write_ai_report")
+  aiDirectSend                Boolean  @default(false) @map("ai_direct_send")
+  ownClassAttendanceGrade     Boolean  @default(false) @map("own_class_attendance_grade")
+  otherTeacherAttendanceGrade Boolean  @default(false) @map("other_teacher_attendance_grade")
+  sendMessage                 Boolean  @default(false) @map("send_message")
+  billing                     Boolean  @default(false)
+  linkParentStudent           Boolean  @default(false) @map("link_parent_student")
+  updatedAt                   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("permission_grants")
+}
+
+model Student {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String?       @unique @map("user_id") @db.Uuid
+  name          String
+  birthDate     DateTime?     @map("birth_date") @db.Date
+  schoolName    String?       @map("school_name")
+  grade         String?
+  phone         String?
+  status        StudentStatus @default(ENROLLED)
+  enrolledAt    DateTime      @default(dbgenerated("CURRENT_DATE")) @map("enrolled_at") @db.Date
+  withdrawnAt   DateTime?     @map("withdrawn_at") @db.Timestamptz(6)
+  viewOnlyUntil DateTime?     @map("view_only_until") @db.Timestamptz(6)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user            User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  parentLinks     ParentStudentLink[]
+  enrollments     ClassEnrollment[]
+  attendance      AttendanceRecord[]
+  absenceRequests AbsenceRequest[]
+  learningRecords LearningRecord[]
+  gradeRecords    GradeRecord[]
+  wrongNotes      WrongNote[]
+  counselingMemos CounselingMemo[]
+  churnCases      ChurnCase[]
+  invoices        Invoice[]
+  reports         AiReport[]
+
+  @@index([status, name])
+  @@map("students")
+}
+
+model ParentStudentLink {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parentUserId String    @map("parent_user_id") @db.Uuid
+  studentId    String    @map("student_id") @db.Uuid
+  relationship String?
+  linkedBy     String?   @map("linked_by") @db.Uuid
+  linkedAt     DateTime  @default(now()) @map("linked_at") @db.Timestamptz(6)
+  endedAt      DateTime? @map("ended_at") @db.Timestamptz(6)
+  endedBy      String?   @map("ended_by") @db.Uuid
+  endReason    String?   @map("end_reason")
+
+  parent  User    @relation("ParentLinks", fields: [parentUserId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+  creator User?   @relation("LinksCreated", fields: [linkedBy], references: [id], onDelete: SetNull)
+  ender   User?   @relation("LinksEnded", fields: [endedBy], references: [id], onDelete: SetNull)
+
+  @@index([parentUserId, studentId])
+  @@index([studentId, endedAt])
+  @@map("parent_student_links")
+}
+
+model Class {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  subject       String
+  teacherUserId String?  @map("teacher_user_id") @db.Uuid
+  schedule      Json     @default("{}")
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  teacher         User?             @relation(fields: [teacherUserId], references: [id], onDelete: SetNull)
+  enrollments     ClassEnrollment[]
+  sessions        ClassSession[]
+  learningRecords LearningRecord[]
+  gradeRecords    GradeRecord[]
+  wrongNotes      WrongNote[]
+
+  @@index([teacherUserId, active])
+  @@map("classes")
+}
+
+model ClassEnrollment {
+  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  classId    String           @map("class_id") @db.Uuid
+  studentId  String           @map("student_id") @db.Uuid
+  status     EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime         @default(dbgenerated("CURRENT_DATE")) @map("enrolled_at") @db.Date
+  endedAt    DateTime?        @map("ended_at") @db.Date
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  class   Class   @relation(fields: [classId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@index([studentId, status])
+  @@index([classId, status])
+  @@map("class_enrollments")
+}
+
+model ClassSession {
+  id        String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  classId   String             @map("class_id") @db.Uuid
+  startsAt  DateTime           @map("starts_at") @db.Timestamptz(6)
+  endsAt    DateTime           @map("ends_at") @db.Timestamptz(6)
+  classroom String?
+  status    ClassSessionStatus @default(SCHEDULED)
+  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  class           Class              @relation(fields: [classId], references: [id])
+  attendance      AttendanceRecord[]
+  absenceRequests AbsenceRequest[]
+
+  @@unique([classId, startsAt])
+  @@index([startsAt, status])
+  @@map("class_sessions")
+}
+
+model AttendanceRecord {
+  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId  String           @map("student_id") @db.Uuid
+  sessionId  String           @map("session_id") @db.Uuid
+  status     AttendanceStatus @default(PRESENT)
+  checkInAt  DateTime?        @map("check_in_at") @db.Timestamptz(6)
+  checkOutAt DateTime?        @map("check_out_at") @db.Timestamptz(6)
+  note       String?
+  updatedBy  String?          @map("updated_by") @db.Uuid
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  student Student      @relation(fields: [studentId], references: [id])
+  session ClassSession @relation(fields: [sessionId], references: [id])
+  updater User?        @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, sessionId])
+  @@index([sessionId, status])
+  @@index([studentId, createdAt(sort: Desc)])
+  @@map("attendance_records")
+}
+
+model AbsenceRequest {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId   String    @map("student_id") @db.Uuid
+  sessionId   String    @map("session_id") @db.Uuid
+  requestedBy String    @map("requested_by") @db.Uuid
+  reason      String
+  requestedAt DateTime  @default(now()) @map("requested_at") @db.Timestamptz(6)
+  cancelledAt DateTime? @map("cancelled_at") @db.Timestamptz(6)
+
+  student   Student      @relation(fields: [studentId], references: [id])
+  session   ClassSession @relation(fields: [sessionId], references: [id])
+  requester User         @relation(fields: [requestedBy], references: [id])
+
+  @@unique([studentId, sessionId])
+  @@index([requestedAt(sort: Desc)])
+  @@map("absence_requests")
+}
+
+model LearningRecord {
+  id           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId    String             @map("student_id") @db.Uuid
+  classId      String?            @map("class_id") @db.Uuid
+  authorUserId String             @map("author_user_id") @db.Uuid
+  type         LearningRecordType
+  title        String
+  content      String
+  recordDate   DateTime           @default(dbgenerated("CURRENT_DATE")) @map("record_date") @db.Date
+  createdAt    DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  student Student @relation(fields: [studentId], references: [id])
+  class   Class?  @relation(fields: [classId], references: [id], onDelete: SetNull)
+  author  User    @relation(fields: [authorUserId], references: [id])
+
+  @@index([studentId, recordDate(sort: Desc)])
+  @@map("learning_records")
+}
+
+model GradeRecord {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId  String   @map("student_id") @db.Uuid
+  classId    String?  @map("class_id") @db.Uuid
+  createdBy  String   @map("created_by") @db.Uuid
+  title      String
+  subject    String
+  score      Decimal  @db.Decimal(7, 2)
+  maxScore   Decimal  @map("max_score") @db.Decimal(7, 2)
+  assessedAt DateTime @map("assessed_at") @db.Date
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  student    Student     @relation(fields: [studentId], references: [id])
+  class      Class?      @relation(fields: [classId], references: [id], onDelete: SetNull)
+  creator    User        @relation(fields: [createdBy], references: [id])
+  wrongNotes WrongNote[]
+
+  @@index([studentId, subject, assessedAt(sort: Desc)])
+  @@map("grade_records")
+}
+
+model WrongNote {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId     String          @map("student_id") @db.Uuid
+  gradeRecordId String?         @map("grade_record_id") @db.Uuid
+  classId       String?         @map("class_id") @db.Uuid
+  authorUserId  String          @map("author_user_id") @db.Uuid
+  questionNo    String?         @map("question_no")
+  questionText  String?         @map("question_text")
+  studentAnswer String?         @map("student_answer")
+  correctAnswer String?         @map("correct_answer")
+  explanation   String?
+  status        WrongNoteStatus @default(OPEN)
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  student     Student          @relation(fields: [studentId], references: [id])
+  gradeRecord GradeRecord?     @relation(fields: [gradeRecordId], references: [id], onDelete: SetNull)
+  class       Class?           @relation(fields: [classId], references: [id], onDelete: SetNull)
+  author      User             @relation(fields: [authorUserId], references: [id])
+  images      WrongNoteImage[]
+
+  @@index([studentId, status, createdAt(sort: Desc)])
+  @@map("wrong_notes")
+}
+
+model WrongNoteImage {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  wrongNoteId String   @map("wrong_note_id") @db.Uuid
+  url         String
+  storageKey  String   @map("storage_key")
+  mimeType    String?  @map("mime_type")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  wrongNote WrongNote @relation(fields: [wrongNoteId], references: [id], onDelete: Cascade)
+
+  @@index([wrongNoteId, sortOrder])
+  @@map("wrong_note_images")
+}
+
+model CounselingMemo {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId    String   @map("student_id") @db.Uuid
+  authorUserId String   @map("author_user_id") @db.Uuid
+  content      String
+  counseledAt  DateTime @map("counseled_at") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  student Student @relation(fields: [studentId], references: [id])
+  author  User    @relation(fields: [authorUserId], references: [id])
+
+  @@index([studentId, counseledAt(sort: Desc)])
+  @@map("counseling_memos")
+}
+
+model AiReport {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId       String         @map("student_id") @db.Uuid
+  authorUserId    String         @map("author_user_id") @db.Uuid
+  approverUserId  String?        @map("approver_user_id") @db.Uuid
+  status          AiReportStatus @default(UNWRITTEN)
+  periodStart     DateTime       @map("period_start") @db.Date
+  periodEnd       DateTime       @map("period_end") @db.Date
+  keywords        Json           @default("[]")
+  content         String         @default("")
+  rejectionReason String?        @map("rejection_reason")
+  approvedAt      DateTime?      @map("approved_at") @db.Timestamptz(6)
+  sentAt          DateTime?      @map("sent_at") @db.Timestamptz(6)
+  parentReadAt    DateTime?      @map("parent_read_at") @db.Timestamptz(6)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  student  Student   @relation(fields: [studentId], references: [id])
+  author   User      @relation("ReportAuthor", fields: [authorUserId], references: [id])
+  approver User?     @relation("ReportApprover", fields: [approverUserId], references: [id], onDelete: SetNull)
+  messages Message[]
+
+  @@index([studentId, status, createdAt(sort: Desc)])
+  @@index([status, createdAt])
+  @@map("ai_reports")
+}
+
+model ChurnCase {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId      String          @map("student_id") @db.Uuid
+  assignedUserId String?         @map("assigned_user_id") @db.Uuid
+  status         ChurnCaseStatus @default(DETECTED)
+  summary        String?
+  detectedAt     DateTime        @default(now()) @map("detected_at") @db.Timestamptz(6)
+  resolvedAt     DateTime?       @map("resolved_at") @db.Timestamptz(6)
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  student  Student          @relation(fields: [studentId], references: [id])
+  assignee User?            @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
+  signals  ChurnSignalLog[]
+
+  @@index([status, detectedAt(sort: Desc)])
+  @@index([studentId, status])
+  @@map("churn_cases")
+}
+
+model ChurnSignalLog {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  churnCaseId String          @map("churn_case_id") @db.Uuid
+  type        ChurnSignalType
+  value       Decimal?        @db.Decimal(10, 2)
+  threshold   Decimal?        @db.Decimal(10, 2)
+  details     Json            @default("{}")
+  detectedAt  DateTime        @default(now()) @map("detected_at") @db.Timestamptz(6)
+
+  churnCase ChurnCase @relation(fields: [churnCaseId], references: [id], onDelete: Cascade)
+
+  @@index([churnCaseId, detectedAt])
+  @@map("churn_signal_logs")
+}
+
+model ChurnThresholdConfig {
+  id                         Int      @id @default(1)
+  attendanceDropPercentPoint Decimal  @default(15) @map("attendance_drop_percent_point") @db.Decimal(5, 2)
+  scoreDropPoints            Decimal  @default(10) @map("score_drop_points") @db.Decimal(7, 2)
+  consecutiveAbsences        Int      @default(2) @map("consecutive_absences")
+  unpaidDays                 Int      @default(3) @map("unpaid_days")
+  updatedBy                  String?  @map("updated_by") @db.Uuid
+  updatedAt                  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  updater User? @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@map("churn_threshold_configs")
+}
+
+model Invoice {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId    String        @map("student_id") @db.Uuid
+  parentUserId String        @map("parent_user_id") @db.Uuid
+  title        String
+  items        Json          @default("[]")
+  totalAmount  Int           @map("total_amount")
+  status       InvoiceStatus @default(DRAFT)
+  dueDate      DateTime      @map("due_date") @db.Date
+  issuedAt     DateTime?     @map("issued_at") @db.Timestamptz(6)
+  paidAt       DateTime?     @map("paid_at") @db.Timestamptz(6)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  student  Student   @relation(fields: [studentId], references: [id])
+  parent   User      @relation(fields: [parentUserId], references: [id])
+  payments Payment[]
+
+  @@index([studentId, status])
+  @@index([dueDate, status])
+  @@map("invoices")
+}
+
+model Payment {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceId      String        @map("invoice_id") @db.Uuid
+  payerUserId    String?       @map("payer_user_id") @db.Uuid
+  provider       String        @default("TOSS")
+  orderId        String        @unique @map("order_id")
+  paymentKey     String?       @unique @map("payment_key")
+  amount         Int
+  status         PaymentStatus @default(PENDING)
+  method         String?
+  failureCode    String?       @map("failure_code")
+  failureMessage String?       @map("failure_message")
+  requestedAt    DateTime      @default(now()) @map("requested_at") @db.Timestamptz(6)
+  approvedAt     DateTime?     @map("approved_at") @db.Timestamptz(6)
+  cancelledAt    DateTime?     @map("cancelled_at") @db.Timestamptz(6)
+  rawPayload     Json          @default("{}") @map("raw_payload")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+  payer   User?   @relation(fields: [payerUserId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId, status])
+  @@map("payments")
+}
+
+model Message {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  senderUserId String?  @map("sender_user_id") @db.Uuid
+  reportId     String?  @map("report_id") @db.Uuid
+  title        String
+  content      String
+  deepLink     String?  @map("deep_link")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  sender     User?              @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
+  report     AiReport?          @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  recipients MessageRecipient[]
+
+  @@index([createdAt(sort: Desc)])
+  @@map("messages")
+}
+
+model MessageRecipient {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  messageId       String    @map("message_id") @db.Uuid
+  recipientUserId String    @map("recipient_user_id") @db.Uuid
+  readAt          DateTime? @map("read_at") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  message        Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  recipient      User           @relation(fields: [recipientUserId], references: [id])
+  pushDeliveries PushDelivery[]
+
+  @@unique([messageId, recipientUserId])
+  @@index([recipientUserId, readAt, createdAt(sort: Desc)])
+  @@map("message_recipients")
+}
+
+model PushSubscription {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  endpoint  String    @unique
+  p256dh    String
+  auth      String
+  userAgent String?   @map("user_agent")
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(6)
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries PushDelivery[]
+
+  @@index([userId, active])
+  @@map("push_subscriptions")
+}
+
+model PushDelivery {
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipientId    String             @map("recipient_id") @db.Uuid
+  subscriptionId String?            @map("subscription_id") @db.Uuid
+  status         PushDeliveryStatus @default(PENDING)
+  attemptedAt    DateTime?          @map("attempted_at") @db.Timestamptz(6)
+  sentAt         DateTime?          @map("sent_at") @db.Timestamptz(6)
+  error          String?
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  recipient    MessageRecipient  @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  subscription PushSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId, status])
+  @@index([subscriptionId, createdAt(sort: Desc)])
+  @@map("push_deliveries")
+}
+
+model NewsItem {
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  kind      NewsKind     @default(NOTICE)
+  category  NewsCategory @default(GENERAL)
+  audience  NewsAudience @default(ALL)
+  title     String
+  content   String?
+  imageUrl  String?      @map("image_url")
+  linkUrl   String?      @map("link_url")
+  sortOrder Int          @default(0) @map("sort_order")
+  published Boolean      @default(false)
+  startsAt  DateTime?    @map("starts_at") @db.Timestamptz(6)
+  endsAt    DateTime?    @map("ends_at") @db.Timestamptz(6)
+  createdBy String?      @map("created_by") @db.Uuid
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  creator User? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@index([published, audience, category, sortOrder])
+  @@map("news_items")
+}
+
+model Inquiry {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  guardianName      String        @map("guardian_name")
+  phone             String
+  studentGrade      String?       @map("student_grade")
+  interestedSubject String?       @map("interested_subject")
+  preferredTime     String?       @map("preferred_time")
+  message           String?
+  internalMemo      String?       @map("internal_memo")
+  status            InquiryStatus @default(NEW)
+  assignedUserId    String?       @map("assigned_user_id") @db.Uuid
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  assignee User? @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt(sort: Desc)])
+  @@map("inquiries")
+}
+
+model AuditLog {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  action      String
+  targetType  String   @map("target_type")
+  targetId    String?  @map("target_id") @db.Uuid
+  details     Json     @default("{}")
+  ipAddress   String?  @map("ip_address") @db.Inet
+  userAgent   String?  @map("user_agent")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([targetType, targetId, createdAt(sort: Desc)])
+  @@index([actorUserId, createdAt(sort: Desc)])
+  @@map("audit_logs")
+}

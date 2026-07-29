@@ -1,6 +1,6 @@
-# A학원 SaaS · Next.js 와이어프레임
+# A학원 SaaS · Next.js
 
-`academy-ui-wireframe.html`을 기반으로 새로 구성한 Next.js + TypeScript 프로젝트입니다.
+학원 SaaS 폴더 구조 V3를 기준으로 구성한 단일 Next.js 풀스택 프로젝트입니다.
 
 ## 실행
 
@@ -23,18 +23,40 @@ npm run dev
 
 ## 주요 기능
 
-- 원장·교사·학부모·학생·게스트 역할 전환
-- 역할별 화면 선택 및 사이드 메뉴 연동
+- `/director`, `/staff`, `/parent`, `/student`, `/guest` 역할별 라우트
+- 교직원용 `AdminShell`, 회원용 `MemberShell`
 - Auth.js 기반 Google OAuth 로그인
+- Google 인증 후 추가 정보를 입력하는 회원가입 흐름
 - Apple 디자인 토큰 기반의 반응형 UI
-- 모바일에서 가로 메뉴와 1열 카드 레이아웃 적용
-- React 상태로 화면 전환과 폼 컨트롤 관리
+- PostgreSQL 초기 SQL 및 Prisma 연결 스키마
+- `/preview`에서 기존 전체 역할 와이어프레임 제공
 
-## 주요 파일
+## 주요 구조
 
-- `src/app/page.tsx`: 역할·화면 데이터 및 React UI
-- `src/app/login/page.tsx`: Google 로그인 화면
-- `src/auth.ts`: Auth.js와 Google 공급자 설정
-- `src/app/page.module.css`: Stripe 스타일과 반응형 레이아웃
-- `src/app/globals.css`: 전역 타이포그래피와 기본 스타일
-- `src/app/layout.tsx`: 한국어 문서 설정과 메타데이터
+```text
+prisma/                     PostgreSQL·Prisma 스키마
+scripts/                    운영 스크립트
+src/app/(auth)/             로그인·회원가입·차단
+src/app/(director)/         원장 라우트
+src/app/(staff)/            교직원 라우트
+src/app/(parent)/           학부모 라우트
+src/app/(student)/          학생 라우트
+src/app/(guest)/            게스트 라우트
+src/components/layout/      AdminShell·MemberShell
+src/features/               화면 단위 기능
+src/lib/                    인증·DB·권한·미리보기 데이터
+src/types/                  공통 역할·권한 타입
+```
+
+Next.js 16에서는 `middleware.ts`가 폐기되어 동일한 역할을 하는
+`src/proxy.ts`를 사용합니다.
+
+## 데이터베이스
+
+```bash
+docker compose up -d
+psql "$DATABASE_URL" -f prisma/sql/schema.sql
+```
+
+`prisma/schema.prisma`는 인증 및 학부모·학생 연결의 핵심 모델부터 정의되어
+있습니다. 전체 MVP 테이블 원본은 `prisma/sql/schema.sql`에 있습니다.

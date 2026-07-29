@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { auth, signIn } from "@/auth";
+import { signIn } from "@/lib/auth";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -10,11 +9,7 @@ export default async function LoginPage({
 }: {
     searchParams: Promise<{ error?: string }>;
 }) {
-    const [session, params] = await Promise.all([auth(), searchParams]);
-
-    if (session?.user) {
-        redirect("/");
-    }
+    const params = await searchParams;
 
     return (
         <main className={styles.page}>
@@ -60,7 +55,12 @@ export default async function LoginPage({
                         동의하게 됩니다.
                     </p>
 
-                    <Link href="/" className={styles.backLink}>
+                    <p className={styles.signupPrompt}>
+                        처음 방문하셨나요?
+                        <Link href="/signup">회원가입</Link>
+                    </p>
+
+                    <Link href="/preview" className={styles.backLink}>
                         와이어프레임으로 돌아가기
                     </Link>
                 </div>
