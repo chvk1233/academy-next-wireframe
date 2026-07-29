@@ -41,7 +41,9 @@ export default async function LoginPage({
                     <form
                         action={async () => {
                             "use server";
-                            await signIn("google", { redirectTo: "/" });
+                            await signIn("google", {
+                                redirectTo: "/post-login",
+                            });
                         }}
                     >
                         <button className={styles.googleButton} type="submit">

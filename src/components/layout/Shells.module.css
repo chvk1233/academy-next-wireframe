@@ -1,266 +1,276 @@
 .adminPage,
 .memberPage {
-  min-height: 100vh;
-  color: #1d1d1f;
-  background: #f5f5f7;
+    min-height: 100vh;
+    color: #1d1d1f;
+    background: #f5f5f7;
 }
 
 .adminHeader,
 .memberHeader {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 0 24px;
-  border-bottom: 1px solid rgb(0 0 0 / 8%);
-  background: rgb(255 255 255 / 88%);
-  backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 0 24px;
+    border-bottom: 1px solid rgb(0 0 0 / 8%);
+    background: rgb(255 255 255 / 88%);
+    backdrop-filter: blur(20px);
 }
 
 .brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: inherit;
-  text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: inherit;
+    text-decoration: none;
 }
 
 .brand > span {
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  color: #fff;
-  background: #1d1d1f;
-  font-size: 14px;
-  font-weight: 750;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    background: #1d1d1f;
+    font-size: 14px;
+    font-weight: 750;
 }
 
 .brand div {
-  display: grid;
+    display: grid;
 }
 
 .brand strong {
-  font-size: 20px;
-  line-height: 1.1;
+    font-size: 20px;
+    line-height: 1.1;
 }
 
 .brand small {
-  color: #86868b;
-  font-size: 10px;
+    color: #86868b;
+    font-size: 10px;
 }
 
 .headerTools {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
 }
 
 .search {
-  width: min(34vw, 320px);
-  height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  border-radius: 11px;
-  color: #86868b;
-  background: #f2f2f7;
+    width: min(34vw, 320px);
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-radius: 11px;
+    color: #86868b;
+    background: #f2f2f7;
 }
 
 .search input {
-  min-width: 0;
-  flex: 1;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-size: 13px;
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: 13px;
 }
 
 .sessionLink {
-  flex: 0 0 auto;
-  padding: 8px 13px;
-  border-radius: 10px;
-  color: #0066cc;
-  background: #edf5ff;
-  font-size: 12px;
-  font-weight: 650;
-  text-decoration: none;
+    flex: 0 0 auto;
+    padding: 8px 13px;
+    border-radius: 10px;
+    color: #0066cc;
+    background: #edf5ff;
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
 }
 
 .adminBody {
-  min-height: calc(100vh - 64px);
-  display: grid;
-  grid-template-columns: 224px minmax(0, 1fr);
+    min-height: calc(100vh - 64px);
+    display: grid;
+    grid-template-columns: 224px minmax(0, 1fr);
 }
 
 .sidebar {
-  padding: 22px 14px;
-  border-right: 1px solid rgb(0 0 0 / 7%);
-  background: #fff;
+    padding: 22px 14px;
+    border-right: 1px solid rgb(0 0 0 / 7%);
+    background: #fff;
 }
 
 .sidebar nav {
-  position: sticky;
-  top: 86px;
-  display: grid;
-  gap: 5px;
+    position: sticky;
+    top: 86px;
+    display: grid;
+    gap: 5px;
 }
 
 .navLink,
 .navActive {
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 0 13px;
-  border-radius: 11px;
-  color: #515154;
-  font-size: 13px;
-  text-decoration: none;
-  transition:
-    color 140ms ease,
-    background 140ms ease,
-    transform 140ms ease;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 13px;
+    border-radius: 11px;
+    color: #515154;
+    font-size: 13px;
+    text-decoration: none;
+    transition:
+        color 140ms ease,
+        background 140ms ease,
+        transform 140ms ease;
 }
 
 .navLink:hover {
-  color: #1d1d1f;
-  background: #f5f5f7;
+    color: #1d1d1f;
+    background: #f5f5f7;
 }
 
 .navActive {
-  color: #0066cc;
-  background: #eaf3ff;
+    color: #0066cc;
+    background: #eaf3ff;
 }
 
 .navLink > span,
 .navActive > span {
-  width: 20px;
-  text-align: center;
+    width: 20px;
+    text-align: center;
 }
 
 .adminContent {
-  min-width: 0;
-  padding: 32px clamp(20px, 2.5vw, 40px) 64px;
+    min-width: 0;
+    padding: 32px clamp(20px, 2.5vw, 40px) 64px;
 }
 
 .memberHeader {
-  justify-content: space-between;
+    justify-content: space-between;
 }
 
 .desktopNav {
-  min-width: 0;
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-  margin-left: auto;
-  overflow-x: auto;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-left: auto;
+    overflow-x: auto;
 }
 
 .desktopNav .navLink,
 .desktopNav .navActive {
-  min-height: 38px;
-  flex: 0 0 auto;
-  padding-inline: 11px;
+    min-height: 38px;
+    flex: 0 0 auto;
+    padding-inline: 11px;
 }
 
 .desktopNav .navLink > span,
 .desktopNav .navActive > span {
-  display: none;
+    display: none;
 }
 
 .memberContent {
-  width: 100%;
-  margin: 0;
-  padding: 32px clamp(20px, 3vw, 48px) 80px;
+    width: 100%;
+    margin: 0;
+    padding: 32px clamp(20px, 3vw, 48px) 80px;
 }
 
 .mobileNav {
-  display: none;
+    display: none;
 }
 
 @media (max-width: 767px) {
-  .adminHeader,
-  .memberHeader {
-    min-height: 58px;
-    padding-inline: 16px;
-  }
+    .adminHeader,
+    .memberHeader {
+        min-height: 58px;
+        padding-inline: 16px;
+    }
 
-  .search {
-    display: none;
-  }
+    .search {
+        display: none;
+    }
 
-  .adminBody {
-    display: block;
-  }
+    .adminBody {
+        display: block;
+    }
 
-  .sidebar {
-    overflow-x: auto;
-    padding: 10px 12px;
-    border-right: 0;
-    border-bottom: 1px solid rgb(0 0 0 / 7%);
-  }
+    .sidebar {
+        overflow-x: auto;
+        padding: 10px 12px;
+        border-right: 0;
+        border-bottom: 1px solid rgb(0 0 0 / 7%);
+    }
 
-  .sidebar nav {
-    position: static;
-    width: max-content;
-    display: flex;
-  }
+    .sidebar nav {
+        position: static;
+        width: max-content;
+        display: flex;
+    }
 
-  .sidebar .navLink,
-  .sidebar .navActive {
-    min-height: 38px;
-  }
+    .sidebar .navLink,
+    .sidebar .navActive {
+        min-height: 38px;
+    }
 
-  .adminContent {
-    padding: 24px 16px 48px;
-  }
+    .adminContent {
+        padding: 24px 16px 48px;
+    }
 
-  .desktopNav {
-    display: none;
-  }
+    .desktopNav {
+        display: none;
+    }
 
-  .memberContent {
-    width: 100%;
-    padding: 24px 14px 94px;
-  }
+    .memberContent {
+        width: 100%;
+        padding: 24px 14px 94px;
+    }
 
-  .mobileNav {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 30;
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(70px, 1fr);
-    overflow-x: auto;
-    padding: 7px max(8px, env(safe-area-inset-left))
-      calc(7px + env(safe-area-inset-bottom));
-    border-top: 1px solid rgb(0 0 0 / 9%);
-    background: rgb(255 255 255 / 92%);
-    backdrop-filter: blur(20px);
-  }
+    .mobileNav {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 30;
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(70px, 1fr);
+        overflow-x: auto;
+        padding: 7px max(8px, env(safe-area-inset-left))
+            calc(7px + env(safe-area-inset-bottom));
+        border-top: 1px solid rgb(0 0 0 / 9%);
+        background: rgb(255 255 255 / 92%);
+        backdrop-filter: blur(20px);
+    }
 
-  .mobileNav .navLink,
-  .mobileNav .navActive {
-    min-height: 49px;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
-    padding: 4px 8px;
-    font-size: 10px;
-  }
+    .mobileNav .navLink,
+    .mobileNav .navActive {
+        min-height: 49px;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+        padding: 4px 8px;
+        font-size: 10px;
+    }
 
-  .mobileNav .navLink > span,
-  .mobileNav .navActive > span {
-    font-size: 16px;
-  }
+    .mobileNav .navLink > span,
+    .mobileNav .navActive > span {
+        font-size: 16px;
+    }
+}
+
+.userName {
+    flex: 0 0 auto;
+    padding: 8px 13px;
+    border-radius: 10px;
+    color: #1d1d1f;
+    background: #f2f2f7;
+    font-size: 13px;
+    font-weight: 650;
 }

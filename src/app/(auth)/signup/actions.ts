@@ -31,16 +31,18 @@ export async function completeSignup(
         errors.address = "주소를 5~120자로 입력해 주세요.";
     }
 
-    if (school.length < 2 || school.length > 50) {
+    if ((school && school.length < 2) || school.length > 50) {
         errors.school = "학교 이름을 2~50자로 입력해 주세요.";
     }
 
-    if (!/^\d{1,2}$/.test(grade)) {
-        errors.grade = "학년은 숫자만 입력해 주세요.";
-    } else {
-        const numericGrade = Number(grade);
-        if (numericGrade < 1 || numericGrade > 12) {
-            errors.grade = "학년은 1~12 사이로 입력해 주세요.";
+    if (grade) {
+        if (!/^\d{1,2}$/.test(grade)) {
+            errors.grade = "학년은 숫자만 입력해 주세요.";
+        } else {
+            const numericGrade = Number(grade);
+            if (numericGrade < 1 || numericGrade > 12) {
+                errors.grade = "학년은 1~12 사이로 입력해 주세요.";
+            }
         }
     }
 
@@ -69,32 +71,30 @@ export async function completeSignup(
 
     const directorEmail = process.env.DIRECTOR_EMAIL?.trim().toLowerCase();
 
-    if (!directorEmail) {
-        return {
-            status: "error",
-            message: "관리자 이메일 설정이 없습니다. 관리자에게 문의해 주세요.",
-            errors: {},
-        };
-    }
-
-    if (email !== directorEmail) {
-        return {
-            status: "error",
-            message: "관리자 이메일이 아닙니다. 관리자에게 문의해 주세요.",
-            errors: {},
-        };
-    }
+    const isDirector = email === directorEmail;
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user || user.onboardingCompleteAt) {
+            return {
+                status: "error",
+                message: "이미 가입된 이메일입니다.",
+                errors: {},
+            };
+        }
+
         await prisma.user.update({
             where: { email },
             data: {
                 name,
                 address,
-                schoolName: school,
-                grade,
-                phone,
-                role: "DIRECTOR",
+                schoolName: school || null,
+                grade: grade || null,
+                phone: phone || null,
+                role: isDirector ? "DIRECTOR" : "GUEST",
                 onboardingCompleteAt: new Date(),
             },
         });

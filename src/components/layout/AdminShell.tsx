@@ -2,17 +2,20 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { roleNavigation } from "@/lib/dummy-data";
 import type { RolePrefix } from "@/types/roles";
+import { auth } from "@/lib/auth";
 import NavLink from "./NavLink";
 import styles from "./Shells.module.css";
 
-export default function AdminShell({
+export default async function AdminShell({
     role,
     children,
 }: {
     role: Extract<RolePrefix, "director" | "staff">;
     children: ReactNode;
 }) {
+    const session = await auth();
     const roleLabel = role === "director" ? "원장" : "교직원";
+    const userName = session?.user?.name ?? roleLabel;
 
     return (
         <div className={styles.adminPage}>
@@ -33,9 +36,15 @@ export default function AdminShell({
                             aria-label="학생 검색"
                         />
                     </label>
-                    <Link href="/login" className={styles.sessionLink}>
-                        로그인
-                    </Link>
+                    {session?.user ? (
+                        <span className={styles.userName}>
+                            {userName} {role === "director" ? "원장" : "교직원"}
+                        </span>
+                    ) : (
+                        <Link href="/login" className={styles.sessionLink}>
+                            로그인
+                        </Link>
+                    )}
                 </div>
             </header>
             <div className={styles.adminBody}>

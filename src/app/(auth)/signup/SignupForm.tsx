@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 import { completeSignup, type SignupField, type SignupState } from "./actions";
 import styles from "./page.module.css";
@@ -17,7 +16,6 @@ type SignupFormProps = {
 };
 
 export default function SignupForm({ onComplete }: SignupFormProps) {
-    const router = useRouter();
     const [state, formAction, pending] = useActionState(
         completeSignup,
         initialSignupState,
@@ -26,15 +24,10 @@ export default function SignupForm({ onComplete }: SignupFormProps) {
     const errors = state?.errors ?? {};
 
     useEffect(() => {
-        if (status !== "success") return;
-
-        onComplete();
-        const redirectTimer = window.setTimeout(() => {
-            router.push("/");
-        }, 2500);
-
-        return () => window.clearTimeout(redirectTimer);
-    }, [onComplete, router, status]);
+        if (status === "success") {
+            onComplete();
+        }
+    }, [onComplete, status]);
 
     if (status === "success") {
         return (
