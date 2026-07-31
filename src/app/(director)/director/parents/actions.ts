@@ -9,6 +9,13 @@ export type ParentLinkState = {
     message: string;
 }
 
+const allowedRelationships = new Set([
+    "어머니",
+    "아버지",
+    "조부모",
+    "기타 보호자",
+]);
+
 export async function linkParentStudent(_prevState: ParentLinkState, formData: FormData) : Promise<ParentLinkState> {
     try {
         const session = await auth();
@@ -22,7 +29,7 @@ export async function linkParentStudent(_prevState: ParentLinkState, formData: F
 
         const parentUserId = formData.get("parentUserId");
         const studentId = formData.get("studentId");
-        const relationshipValue = formData.get("relationshipValue");
+        const relationshipValue = formData.get("relationship");
 
         if (typeof parentUserId !== "string" || !parentUserId) {
             return {
@@ -38,10 +45,14 @@ export async function linkParentStudent(_prevState: ParentLinkState, formData: F
             }
         }
 
-        const relationship = 
-            typeof relationshipValue === "string"
-            ? relationshipValue.trim()
-            : "";
+        if (typeof relationshipValue !== "string" || !allowedRelationships.has(relationshipValue)) {
+            return {
+                status: "error",
+                message: "학생과의 관계를 다시 선택해주세요."
+            }
+        }
+
+        const relationship = relationshipValue
 
         await prisma.$transaction(async (tx) => {
             const parent = await tx.user.findFirst({

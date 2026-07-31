@@ -1,3 +1,4 @@
+import styles from "./page.module.css";
 import { prisma } from "@/lib/db";
 import ParentStudentLinkForm from "./ParentStudentLinkForm";
 import UnlinkParentStudentButton from "./UnlinkParentStudentButton";
@@ -104,16 +105,52 @@ export default async function DirectorParentsPage() {
     ]);
 
     return (
-        <section>
-            <header>
-                <p>PARENTS</p>
-                <h1>학부모 관리</h1>
-                <p>학부모 계정과 학생 계정을 연결합니다.</p>
+        <section className={styles.page}>
+            <header className={styles.heading}>
+                <div>
+                    <span className={styles.eyebrow}>PARENTS</span>
+                    <h1>학부모 관리</h1>
+                    <p>학부모 계정과 학생 계정을 연결합니다.</p>
+                </div>
+                <div className={styles.activeBadge}>
+                    <span className={styles.statusDot} aria-hidden="true"/>연결
+                    <strong>{activeLinks.length}건</strong>
+                </div>
             </header>
-            <div>
-                <p>연결 가능한 학부모: {parents.length}명</p>
-                <p>연결 가능한 학생: {students.length}명</p>
-            </div>
+            <section
+                className={styles.summary}
+                aria-label="연결 가능 계정 요약"
+            >
+                <article className={styles.summaryCard}>
+                    <div
+                        className={styles.parentSummaryIcon}
+                        aria-hidden="true"
+                    >
+                        P
+                    </div>
+
+                    <div className={styles.summaryContent}>
+                        <span>연결 가능한 학부모</span>
+                        <strong>{parents.length}명</strong>
+                        <p>활성 상태인 학부모 계정입니다.</p>
+                    </div>
+                </article>
+
+                <article className={styles.summaryCard}>
+                    <div
+                        className={styles.studentSummaryIcon}
+                        aria-hidden="true"
+                    >
+                        S
+                    </div>
+
+                    <div className={styles.summaryContent}>
+                        <span>연결 가능한 학생</span>
+                        <strong>{students.length}명</strong>
+                        <p>현재 학부모가 연결되지 않은 학생입니다.</p>
+                    </div>
+                </article>
+            </section>
             <ParentStudentLinkForm parents={parents} students={students} />
             <section>
                 <header>
